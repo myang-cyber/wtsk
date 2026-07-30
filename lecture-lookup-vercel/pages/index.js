@@ -165,9 +165,9 @@ export default function Home() {
           font-family: 'Pretendard';
           text-align: center;
           font-size: 36px;
-          font-weight: 800;
+          font-weight: 700;
           color: var(--ink);
-          margin: 20px 0 32px;
+          margin: 50px 0 32px;
           line-height: 1.4;
           letter-spacing: -0.01em;
         }
