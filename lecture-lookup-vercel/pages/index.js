@@ -151,7 +151,8 @@ export default function Home() {
           letter-spacing: 0.28em;
           color: var(--wine);
           font-weight: 700;
-          margin-bottom: 10px;
+          margin-top: 50px;
+          margin-bottom: 20px;
         }
         .subtitle {
           text-align: center;
