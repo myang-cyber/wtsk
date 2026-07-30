@@ -77,11 +77,11 @@ export default function Home() {
             />
           </div>
           <div className="field">
-            <label htmlFor="phoneInput">전화번호</label>
+            <label htmlFor="phoneInput">연락처 (등록시 입력하신 연락처로 넣어주세요.)</label>
             <input
               id="phoneInput"
               type="tel"
-              placeholder="010-1234-5678"
+              placeholder="01012345678"
               autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
