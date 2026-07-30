@@ -77,7 +77,7 @@ export default function Home() {
             />
           </div>
           <div className="field">
-            <label htmlFor="phoneInput">연락처 (등록시 입력하신 연락처로 넣어주세요.)</label>
+            <label htmlFor="phoneInput">전화번호</label>
             <input
               id="phoneInput"
               type="tel"
@@ -167,7 +167,7 @@ export default function Home() {
           font-size: 36px;
           font-weight: 700;
           color: var(--ink);
-          margin: 50px 0 32px;
+          margin: 40px 0 32px;
           line-height: 1.4;
           letter-spacing: -0.01em;
         }
