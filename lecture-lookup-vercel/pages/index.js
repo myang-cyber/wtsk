@@ -147,7 +147,7 @@ export default function Home() {
         }
         .eyebrow {
           text-align: center;
-          font-size: 14px;
+          font-size: 18px;
           letter-spacing: 0.28em;
           color: var(--wine);
           font-weight: 700;
@@ -156,18 +156,18 @@ export default function Home() {
         }
         .subtitle {
           text-align: center;
-          font-size: 17px;
+          font-size: 20px;
           color: var(--ink-soft);
           margin: 0 0 8px;
           font-family: 'Nanum Myeongjo', serif;
         }
         h1 {
-          font-family: 'Nanum Myeongjo', serif;
+          font-family: 'Pretendard';
           text-align: center;
-          font-size: 34px;
+          font-size: 36px;
           font-weight: 800;
           color: var(--ink);
-          margin: 0 0 32px;
+          margin: 20px 0 32px;
           line-height: 1.4;
           letter-spacing: -0.01em;
         }
