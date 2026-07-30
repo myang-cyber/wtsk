@@ -1,10 +1,10 @@
 // Notion 데이터베이스에서 이름 + 전화번호로 신청한 선택특강을 조회하는 API
 //
 // Notion 데이터베이스에는 아래 4개의 컬럼(속성)이 있어야 합니다:
-//   - 이름       (속성 타입: 제목 / Title)
-//   - 전화번호    (속성 타입: 텍스트 / Text)
-//   - 교시       (속성 타입: 텍스트 또는 선택 / Text or Select) - 선택 사항
-//   - 선택특강    (속성 타입: 텍스트 또는 선택 / Text or Select)
+//   - 이름        (속성 타입: 제목 / Title)
+//   - 전화번호     (속성 타입: 텍스트 / Text)
+//   - 선택특강 1   (속성 타입: 텍스트 / Text)
+//   - 선택특강 2   (속성 타입: 텍스트 / Text) - 비어 있어도 됨
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -30,34 +30,40 @@ export default async function handler(req, res) {
   const normalizedInputPhone = String(phone).replace(/\D/g, '');
 
   try {
-    const notionRes = await fetch(
-      `https://api.notion.com/v1/databases/${NOTION_DATABASE_ID}/query`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${NOTION_API_KEY}`,
-          'Notion-Version': '2022-06-28',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          filter: {
-            property: '이름',
-            title: { equals: trimmedName },
+    let allResults = [];
+    let cursor = undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const notionRes = await fetch(
+        `https://api.notion.com/v1/databases/${NOTION_DATABASE_ID}/query`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${NOTION_API_KEY}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json',
           },
-          page_size: 50,
-        }),
+          body: JSON.stringify({
+            page_size: 100,
+            start_cursor: cursor,
+          }),
+        }
+      );
+
+      if (!notionRes.ok) {
+        const errText = await notionRes.text();
+        console.error('Notion API error:', notionRes.status, errText);
+        return res.status(502).json({
+          error: 'Notion 조회 중 오류가 발생했습니다. 데이터베이스 연결 상태를 확인해 주세요.',
+        });
       }
-    );
 
-    if (!notionRes.ok) {
-      const errText = await notionRes.text();
-      console.error('Notion API error:', notionRes.status, errText);
-      return res.status(502).json({
-        error: 'Notion 조회 중 오류가 발생했습니다. 데이터베이스 연결 상태를 확인해 주세요.',
-      });
+      const data = await notionRes.json();
+      allResults = allResults.concat(data.results || []);
+      hasMore = data.has_more;
+      cursor = data.next_cursor;
     }
-
-    const data = await notionRes.json();
 
     const extractText = (prop) => {
       if (!prop) return '';
@@ -68,20 +74,21 @@ export default async function handler(req, res) {
       return '';
     };
 
-    const matches = (data.results || [])
-      .map((page) => {
+    const normalize = (s) => String(s).normalize('NFC').trim();
+
+    const matches = allResults
+      .filter((page) => {
         const props = page.properties || {};
-        return {
-          name: extractText(props['이름']),
-          phone: extractText(props['전화번호']),
-          session: extractText(props['교시']),
-          lecture: extractText(props['선택특강']),
-        };
+        const nameVal = normalize(extractText(props['이름']));
+        const phoneVal = extractText(props['전화번호']).replace(/\D/g, '');
+        return nameVal === normalize(trimmedName) && phoneVal === normalizedInputPhone;
       })
-      .filter(
-        (row) =>
-          row.phone.replace(/\D/g, '') === normalizedInputPhone && row.lecture
-      );
+      .flatMap((page) => {
+        const props = page.properties || {};
+        const lecture1 = extractText(props['선택특강 1']);
+        const lecture2 = extractText(props['선택특강 2']);
+        return [lecture1, lecture2].filter(Boolean).map((lecture) => ({ lecture }));
+      });
 
     return res.status(200).json({ matches });
   } catch (err) {
