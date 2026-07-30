@@ -87,7 +87,10 @@ export default async function handler(req, res) {
         const props = page.properties || {};
         const lecture1 = extractText(props['선택특강 1']);
         const lecture2 = extractText(props['선택특강 2']);
-        return [lecture1, lecture2].filter(Boolean).map((lecture) => ({ lecture }));
+        const result = [];
+        if (lecture1) result.push({ session: '선택특강 1', lecture: lecture1 });
+        if (lecture2) result.push({ session: '선택특강 2', lecture: lecture2 });
+        return result;
       });
 
     return res.status(200).json({ matches });
